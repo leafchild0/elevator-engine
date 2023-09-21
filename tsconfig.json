@@ -1,15 +1,15 @@
 {
-  "include": ["**/*.ts"],
+  "include": ["src/**/*.ts"],
   "compilerOptions": {
     "lib": ["ES2022"],
+    "outDir": "dist",
     "isolatedModules": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "target": "ES2022",
     "strict": true,
-    "allowJs": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
+    "removeComments": true
   }
 }
