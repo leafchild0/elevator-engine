@@ -1,7 +1,7 @@
 {
   "include": ["src/**/*.ts"],
   "compilerOptions": {
-    "lib": ["ES2022"],
+    "module": "ESNext",
     "outDir": "dist",
     "isolatedModules": true,
     "esModuleInterop": true,
