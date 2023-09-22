@@ -11,6 +11,7 @@ const INTERVAL_TICK = 1000
 export class ElevatorEngine {
 
     private readonly control: ControlPlane
+    private interval: NodeJS.Timeout | undefined
 
     constructor(control: ControlPlane) {
         this.control = control
@@ -22,19 +23,23 @@ export class ElevatorEngine {
      * Each tick will check for new requests to pick up and update engine state for each of the elevators
      * @see INTERVAL_TICK
      */
-    startEngine() {
-        let retryTime = 0
-        const interval = setInterval(() => {
+    startEngine(): void {
+        this.interval = setInterval(() => {
             if (this.control.hasRequests()) {
                 this.checkRequests()
                 this.updateState()
-            } else {
-                if (retryTime >= 10) interval.unref()
-
-                console.log('No active requests in the system')
-                retryTime += 1
             }
         }, INTERVAL_TICK)
+    }
+
+    /**
+     * Stops the engine, pretty much just stops the loop execution
+     */
+    stopEngine(): void {
+        if (this.interval) {
+            console.log('Stopping the engine')
+            clearInterval(this.interval)
+        }
     }
 
     private onNewRequest(request: ElevatorRequest): void {
