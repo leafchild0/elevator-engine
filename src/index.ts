@@ -1,27 +1,42 @@
-import {Direction, Elevator} from './interfaces'
-import {ControlPlane} from './control-plane'
+import {Direction, Elevator, RequestStatus} from './interfaces.js'
+import {ControlPlane} from './control-plane.js'
 
-(function runEngine() {
+const floors = 10
 
-    const elevators = generateRandomElevators(3)
+/**
+ * Main function to run the engine using Control pane
+ * Pretty much generates random elevators and requests for the sake of demo
+ */
+function runEngine() {
 
-    const control = new ControlPlane(10, elevators)
+    const elevators = generateRandomElevators(2)
 
-    // Then user make a request from any of the floors, can be random
-    // ElevatorRequest {floor: 10, direction: UP or DOWN}
-    // Once this is done, engine should start and work in ticks
-    // One tick is well, one floor for each elevator, assuming they are working the same
-    // I'd like to skip speed here for now
-    // Each tick engine will print it's state including where each elevator is
-    // And how many requests are
-    // Well and of course manage elevators directions and stuff
+    const control = new ControlPlane(floors, elevators)
 
-})()
+    control.startEngine();
+
+    // Let's generate some requests
+    for (let i = 1; i < 20; i++) {
+        control.addRequest({
+            start: i,
+            desired: floors - i,
+            direction: Direction.UP,
+            status: RequestStatus.INIT
+        })
+    }
+}
 
 function generateRandomElevators(amount: number): Elevator[] {
-    return new Array(amount).fill(
-        {
-            floor: 0,
+    const elevators: Elevator[] = [];
+    for (let i = 0; i < amount; i++) {
+        elevators.push({
+            name: 'Elevator ' + i,
+            floor: i,
             direction: Direction.UP
         })
+    }
+
+    return elevators
 }
+
+runEngine()
