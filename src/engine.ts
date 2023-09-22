@@ -1,7 +1,6 @@
 import {ControlPlane} from './control-plane.js'
 import {Direction, Elevator, ElevatorRequest, RequestStatus} from './interfaces.js'
-
-const INTERVAL_TICK = 1000
+import {INTERVAL_TICK} from './constants.js'
 
 /**
  * Engine logic for entire system
@@ -37,7 +36,7 @@ export class ElevatorEngine {
      */
     stopEngine(): void {
         if (this.interval) {
-            console.log('Stopping the engine')
+            console.log('Stopping the engine...')
             clearInterval(this.interval)
         }
     }
@@ -110,7 +109,7 @@ export class ElevatorEngine {
     }
 
     private findClosestElevator(elevators: Elevator[], floor: number): Elevator {
-        return elevators.reduce(function (prev, curr) {
+        return elevators.reduce((prev, curr) => {
             return (Math.abs(curr.floor - floor) < Math.abs(prev.floor - floor) ? curr : prev)
         })
     }

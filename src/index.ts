@@ -1,7 +1,7 @@
+import 'dotenv/config'
 import {Direction, Elevator, RequestStatus} from './interfaces.js'
 import {ControlPlane} from './control-plane.js'
-
-const floors = 10
+import {BUILDING_FLOORS, ELEVATORS_AMOUNT, REQUESTS_AMOUNT} from './constants.js'
 
 /**
  * Main function to run the engine using Control pane
@@ -9,17 +9,17 @@ const floors = 10
  */
 function runEngine() {
 
-    const elevators = generateRandomElevators(2)
+    const elevators = generateRandomElevators(ELEVATORS_AMOUNT)
 
-    const control = new ControlPlane(floors, elevators)
+    const control = new ControlPlane(BUILDING_FLOORS, elevators)
 
     control.startEngine();
 
     // Let's generate some requests
-    for (let i = 1; i < 20; i++) {
+    for (let i = 1; i < REQUESTS_AMOUNT; i++) {
         control.addRequest({
             start: i,
-            desired: floors - i,
+            desired: BUILDING_FLOORS - i,
             direction: Direction.UP,
             status: RequestStatus.INIT
         })
