@@ -3,6 +3,11 @@ import {Direction, Elevator, ElevatorRequest, RequestStatus} from './interfaces.
 
 const INTERVAL_TICK = 1000
 
+/**
+ * Engine logic for entire system
+ * Relies on control pane for requests management and other system parts
+ * So far, only enables the engine, but can be easily improved to be able to disable
+ */
 export class ElevatorEngine {
 
     private readonly control: ControlPlane
@@ -11,7 +16,12 @@ export class ElevatorEngine {
         this.control = control
     }
 
-    // Turn off and on the engine using control plane
+    /**
+     * Starts the engine using control plane
+     * Pretty much an interval which emulates event loop
+     * Each tick will check for new requests to pick up and update engine state for each of the elevators
+     * @see INTERVAL_TICK
+     */
     startEngine() {
         let retryTime = 0
         const interval = setInterval(() => {
@@ -39,10 +49,8 @@ export class ElevatorEngine {
     }
 
     private checkRequests(): void {
-        if (this.control.hasRequests()) {
-            const next = this.control.getNextRequest();
-            if (next) this.onNewRequest(next)
-        }
+        const next = this.control.getNextRequest()
+        if (next) this.onNewRequest(next)
     }
 
     private updateState(): void {
@@ -50,41 +58,53 @@ export class ElevatorEngine {
         this.control.elevators
             .filter(e => e.request)
             .forEach(e => {
+                if (e.floor > this.control.floors) throw new Error('System error, elevator floor is our of range')
 
-                if (e.request?.status === RequestStatus.PENDING) {
-                    e.floor = e.request.start > e.floor ? e.floor + 1 : e.floor - 1
+                // Elevator is trying to pick up the request
+                if (e.request?.status === RequestStatus.PENDING) this.moveToRequest(e)
 
-                    // Move elevator one step in needed direction
-                    console.log(`${e.name} is on ${e.floor} floor and going ${e.request?.start} to pick up`)
-                }
+                // Elevator pick up the request and update status
+                if (e.floor === e.request?.start) this.pickUpRequest(e)
 
-                // Elevator picked up the request and updated status
-                if (e.floor === e.request?.start) {
-                    console.log(`${e.name} has picked up request to ${e.request.desired}`)
-                    e.request.status = RequestStatus.IN_PROGRESS
-                    e.direction = e.request?.desired < e.floor ? Direction.DOWN : Direction.UP
-                }
-
-                if (e.request?.status === RequestStatus.IN_PROGRESS) {
-
-                    // Elevator ready to fulfill the request
-                    if (e.floor === e.request.desired) {
-                        console.log(`Request to floor ${e.request.desired} fulfilled by elevator ${e.name}`)
-                        this.control.removeRequest(e.request)
-                        e.request = undefined
-                    } else {
-                        // If current elevator floor is upper more than desired floor --
-                        e.floor = e.request?.direction === Direction.UP ? e.floor + 1 : e.floor - 1
-
-                        // Move elevator one step in needed direction
-                        console.log(`${e.name} is on ${e.floor} floor and moving to ${e.request?.desired}`)
-                    }
-                }
+                // With request, check if it can be fulfilled, if not move in a correct direction
+                if (e.request?.status === RequestStatus.IN_PROGRESS) this.moveElevatorWithRequest(e)
             })
     }
 
-    private findClosestElevator(elevators: Elevator[], floor: number): Elevator {
+    private moveToRequest(e: Elevator) {
+        if (e.request) {
+            e.floor = e.request.start > e.floor ? e.floor + 1 : e.floor - 1
 
+            // Move elevator one step in needed direction
+            console.log(`${e.name}: ${e.floor} -> ${e.request?.start} to pick up`)
+        }
+    }
+
+    private pickUpRequest(e: Elevator) {
+
+        if (e.request) {
+            console.log(`${e.name} has picked up request to ${e.request?.desired}`)
+            e.request.status = RequestStatus.IN_PROGRESS
+            e.direction = e.request?.desired < e.floor ? Direction.DOWN : Direction.UP
+        }
+    }
+
+    private moveElevatorWithRequest(e: Elevator) {
+        // Elevator ready to fulfill the request
+        if (e.floor === e.request?.desired) {
+            console.log(`Request to floor ${e.request.desired} fulfilled by elevator ${e.name}`)
+            this.control.removeRequest(e.request)
+            e.request = undefined
+        } else {
+            // If current elevator floor is upper more than desired floor --
+            e.floor = e.request?.direction === Direction.UP ? e.floor + 1 : e.floor - 1
+
+            // Move elevator one step in needed direction
+            console.log(`${e.name}: ${e.floor} -> ${e.request?.desired}`)
+        }
+    }
+
+    private findClosestElevator(elevators: Elevator[], floor: number): Elevator {
         return elevators.reduce(function (prev, curr) {
             return (Math.abs(curr.floor - floor) < Math.abs(prev.floor - floor) ? curr : prev)
         })
