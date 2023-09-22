@@ -1,8 +1,11 @@
-// Class is needed as there is no way to pass things around
-// or create more than one plane for this project
 import {Elevator, ElevatorRequest, RequestStatus} from './interfaces.js'
 import {ElevatorEngine} from './engine.js'
 
+/**
+ * Control plane object
+ * Stores all requested and pending elevators requests
+ * Elevators itself and the engine for convenience
+ */
 export class ControlPlane {
 
     public readonly floors: number
@@ -38,5 +41,9 @@ export class ControlPlane {
 
     startEngine(): void {
         this.engine.startEngine()
+    }
+
+    stopEngine(): void {
+        this.engine.stopEngine()
     }
 }
