@@ -17,7 +17,7 @@ export enum Direction {
 }
 
 export enum RequestStatus {
-    INIT= 'Init',
+    INIT = 'Init',
     PENDING = 'Pending',
     IN_PROGRESS = 'In Progress'
 }
